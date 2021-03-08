@@ -1,0 +1,28 @@
+file format
+	day.yaml
+		time (x1440)
+			slot: availability (x18)
+status
+	full: <div class="offering-page-event-is-full">
+	available: <a class="book-now-button">
+	NA: <div class="offering-page-for-booking">
+NA vs full
+	record only full and available
+implementation
+	√ print today as YAML
+	√ print 7 days as YAML
+	√ run for an hour
+		√ print a dot every minute
+		√ save YAML at the end
+	run for a week
+		√ start a new line every hour
+		√ start a new file each day
+need exception handling
+	print 'x' instead of '.' on errors
+analysis
+	√ figure out what the time slots are
+		check that they are always the same
+	calculate how soon each slot gets filled
+	draw the time slots in Inkscape
+outages
+	2021-03-02 13:50-16:10
