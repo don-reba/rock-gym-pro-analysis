@@ -1,7 +1,6 @@
 require 'json'
 require 'nokogiri'
 require 'open-uri'
-require 'yaml'
 
 def get_params(uri)
   doc = Nokogiri::HTML uri.open
@@ -54,7 +53,8 @@ end
 
 offering_guid = '484c1a7ca09145419ef258eeb894c38f'
 widget_guid   = '2224a8b95d0e4ca7bf20012ec34b8f3e'
-uri = URI 'https://app.rockgympro.com/b/widget/?a=offering&offering_guid=%s&widget_guid=%s&random=6034454e7db83&iframeid=&mode=p' % [offering_guid, widget_guid]
+uri = URI 'https://app.rockgympro.com/b/widget/?a=offering&offering_guid=%s&widget_guid=%s&random=6034454e7db83&iframeid=&mode=p' %
+  [offering_guid, widget_guid]
 query_uri = URI.join(uri, '/b/widget/?a=equery')
 
 loop do
@@ -68,7 +68,7 @@ loop do
       begin
         do_at(Time.parse('%02d:%02d' % [h, m])) do |now|
           minute_data = {}
-          7.times do |n|
+          8.times do |n|
             day = (today + n).strftime('%F')
             minute_data[day] = get_offerings(day, query_uri, params)
           end
@@ -80,7 +80,7 @@ loop do
         print '.'
       end
     end
-    File.write('data/%s.yaml' % today.strftime('%F'), data.to_yaml)
+    File.write('data/%s.json' % today.strftime('%F'), data.to_json)
     print "\n"
   end
 
