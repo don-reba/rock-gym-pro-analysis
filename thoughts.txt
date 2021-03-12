@@ -24,18 +24,8 @@ analysis
 		check that they are always the same
 	calculate how soon each slot gets filled
 		109 slots/week
-		265 slots seen
-			March 1-17
-			154 "new" slots
-		187 slots ever open
-			91 new ones
-		15 slots begin as open
-			12 new ones
-			this is unexpected
-				do I scan 6 or 7 days ahead?
-				6…
-				got to do it over
 	draw the time slots in Inkscape
+		not sure how to visualize
 outages
 	2021-03-02 13:50-16:10
 questions
@@ -46,3 +36,5 @@ questions
 			difference
 	how likely is it for slots to become available?
 		TODO
+need to account for summer time
+	available from: same day, same time, previous week

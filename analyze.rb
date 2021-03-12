@@ -1,18 +1,14 @@
+require 'date'
 require 'json'
 require 'time'
 
-class Numeric
-  def minutes
-    60 * self
-  end
-
-  def hours
-    60 * minutes
-  end
-
-  def days
-    24 * hours
-  end
+def available(from)
+  # slots seem to open a minute early, by my clock
+  from -= 60
+  # simply subtracting a week would fail on dailight savings days
+  d = (from.to_date - 7).strftime('%F')
+  t = from.strftime('%T')
+  Time.parse "#{d} #{t}"
 end
 
 def slot_time(slot)
@@ -22,13 +18,17 @@ def slot_time(slot)
 end
 
 def humanize(secs)
-  [[60, :second], [60, :minute], [24, :hour], [Float::INFINITY, :day]].map do |count, name|
-    if secs > 0
-      secs, n = secs.divmod(count)
-      suffix = n == 1 ? '' : 's'
-      "#{n.to_i} #{name}#{suffix}" unless n.to_i == 0
-    end
-  end.compact.reverse.join(' ')
+  if secs > 0
+    [[60, 'second'], [60, 'minute'], [24, 'hour'], [Float::INFINITY, 'day']].map do |count, name|
+      if secs > 0
+        secs, n = secs.divmod(count)
+        suffix = n == 1 ? '' : 's'
+        "#{n.to_i} #{name}#{suffix}" unless n.to_i == 0
+      end
+    end.compact.reverse.join(' ')
+  else
+    "#{secs} seconds"
+  end
 end
 
 samples = JSON.parse(File.read('analysis/combined.json'))
@@ -39,17 +39,17 @@ end
 time_to_fill = {}
 
 samples.each do |slot, samples|
-  next if samples.empty?
-  next if samples[0][1] == :full
-
   from, _ = slot_time(slot)
-  available = from - 7.days
+  available = available(from)
+
+  first_t, _ = samples.first
+
+  next unless first_t < available
 
   t, _ = samples.find {|_, status| status == :full}
   next unless t
 
-  from, _ = slot_time(slot)
-  t + 7.days - from
+  time_to_fill[slot] = t - available
 end
 
 time_to_fill.each do |slot, secs|
