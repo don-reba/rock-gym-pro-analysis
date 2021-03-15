@@ -31,10 +31,34 @@ outages
 questions
 	how long does it take for each slot to fill?
 		compute
-			time first available
-			time first full
-			difference
+			√ time first available
+			√ time first full
+			√ difference
+		visualize
+			divide into classes and colour
+				use hex colours for colouring!
+					though, these are problem-specific
+					not hex-count-specific
+				colours
+					1: #2074FE
+					2: #F2544F
+					3: #FFD200
+					4: #6B1099
+					5: #FF8300
+					6: #00C548
+			display the exact time, also
 	how likely is it for slots to become available?
+		there is a week of availability for each slot
+			when the slot is either open or full
+			graph each and look for patterns
+		visualize
+			draw horizontal bars, one for each slot
+			1080px leaves 9px for each of the 109 slots
+				not enough for 1 min resolution horizontally
+				168px enough for 1 hour resolution
 		TODO
 need to account for summer time
 	available from: same day, same time, previous week
+svg editing
+	namespaces matter
+		'//svg:g[@inkscape:label="mo"]'
