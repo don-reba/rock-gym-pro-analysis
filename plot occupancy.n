@@ -1,10 +1,14 @@
 // REFERENCE: Newtonsoft.Json.dll
+// REFERENCE: NodaTime.dll
 
 using Nemerle.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NodaTime;
 using System;
+using System.Collections.Generic;
 using System.Console;
+using System.Drawing;
 using System.IO;
 
 enum Status
@@ -14,59 +18,97 @@ enum Status
 | Open
 }
 
-def timezone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-
-def ParseJsonTime(str)
+def CollectTimelines(scale, path)
 {
-	def time = DateTime.ParseExact(str, "yyyy-MM-dd HH:mm", Globalization.CultureInfo.InvariantCulture);
-	DateTimeOffset(time, timezone.GetUtcOffset(time));
-}
-
-def begin = ParseJsonTime("2021-03-11 19:00");
-def end   = ParseJsonTime("2021-03-18 19:00");
-
-def SlotIndex(t)
-{
-	def m = (t - begin).TotalMinutes :> int;
-	m / 60
-}
-def n = SlotIndex(end);
-
-WriteLine("Reading data...");
-
-def data = @"analysis\combined.json" |> File.ReadAllText |> JObject.Parse;
-
-WriteLine("Assembling timelines...");
-
-foreach ((Key = slot, Value = samples) in data)
-{
-	when (ParseJsonTime(slot) >= ParseJsonTime("2021-03-18 19:00"))
+	def timePattern = Text.LocalDateTimePattern.CreateWithCurrentCulture("yyyy-MM-dd HH:mm");
+	def ParseJsonTime(str)
 	{
-		def timeline = array(n);
-		foreach (sample in samples)
+		timePattern.Parse(str).Value
+	}
+
+	def Available(from : LocalDateTime)
+	{
+		from - Period.FromDays(7) - Period.FromMinutes(1);
+	}
+
+	def begin = ParseJsonTime("2021-03-11 19:00");
+	def end   = ParseJsonTime("2021-03-18 19:00");
+
+	def SlotIndex(from, to)
+	{
+		def tz = DateTimeZoneProviders.Bcl["Pacific Standard Time"];
+		def from = from.InZoneStrictly(tz);
+		def to   = to.InZoneStrictly(tz);
+		((to - from).TotalMinutes :> int) / scale;
+	}
+	def n = SlotIndex(begin, end);
+
+	WriteLine("Reading data...");
+
+	def data = path |> File.ReadAllText |> JObject.Parse;
+
+	WriteLine("Assembling timelines...");
+
+	def timelines = List();
+
+	foreach ((Key = slot, Value = samples) in data)
+	{
+		def from = ParseJsonTime(slot);
+		when (from >= ParseJsonTime("2021-03-18 19:00"))
 		{
-			def i = SlotIndex(ParseJsonTime(sample[0] :> string));
-			when (i < n)
+			def timeline = array(n);
+			foreach (sample in samples)
 			{
-				match (sample[1] :> string)
+				def i = SlotIndex(Available(from), ParseJsonTime(sample[0] :> string));
+				when (i < n)
 				{
-				| "open" => timeline[i] = Status.Open
-				| "full" when timeline[i] == Status.NA => timeline[i] = Status.Full
-				| _ => ()
+					match (sample[1] :> string)
+					{
+					| "open" => timeline[i] = Status.Open
+					| "full" when timeline[i] == Status.NA => timeline[i] = Status.Full
+					| _ => ()
+					}
 				}
 			}
+			timelines.Add(slot, timeline);
 		}
+	}
 
-		Write("{0} ", slot);
-		foreach (status in timeline)
+	timelines;
+}
+
+def PlotTimelines(timelines, rowHeight, path)
+{
+	WriteLine("Plotting timelines...");
+
+	def StatusColor(_ : Status)
+	{
+	| NA   => Color.White
+	| Open => Color.Green
+	| Full => Color.Gray
+	}
+
+	mutable y = 0;
+	using (bmp = Bitmap(timelines[0][1].Length, timelines.Count * rowHeight))
+	{
+		foreach ((_, timeline) in timelines)
 		{
-			match (status)
+			repeat (rowHeight)
 			{
-			| NA => Write(' ')
-			| Full => Write('_')
-			| Open => Write('x')
+				for (mutable x = 0; x != timeline.Length; ++x)
+					bmp.SetPixel(x, y, StatusColor(timeline[x]));
+				++y;
 			}
 		}
-		WriteLine();
+		bmp.Save(path);
 	}
 }
+
+PlotTimelines
+	( timelines = CollectTimelines
+		( scale = 5
+		, path  = @"analysis\combined.json"
+		)
+	, rowHeight = 8
+	, path      = @"analysis\timelines.png"
+	);
