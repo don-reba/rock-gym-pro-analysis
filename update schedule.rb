@@ -60,8 +60,7 @@ end
 time_to_fill = {}
 
 samples.each do |slot, samples|
-  from, _ = slot_time(slot)
-  available = available(from)
+  available = available(Time.parse(slot))
 
   first_t, _ = samples.first
 
@@ -87,7 +86,7 @@ end
 time_to_fill.each do |slot, secs|
   mins = (secs / 60).round
 
-  from, _ = slot_time(slot)
+  from = Time.parse(slot)
   d = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'][from.strftime('%w').to_i]
   t = from.strftime('%H%M')
 
