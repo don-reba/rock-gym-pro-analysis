@@ -36,16 +36,7 @@ questions
 			√ difference
 		visualize
 			divide into classes and colour
-				use hex colours for colouring!
-					though, these are problem-specific
-					not hex-count-specific
-				colours
-					1: #2074FE
-					2: #F2544F
-					3: #FFD200
-					4: #6B1099
-					5: #FF8300
-					6: #00C548
+				lightness: 67
 			display the exact time, also
 	how likely is it for slots to become available?
 		there is a week of availability for each slot
@@ -62,3 +53,5 @@ need to account for summer time
 svg editing
 	namespaces matter
 		'//svg:g[@inkscape:label="mo"]'
+		doc.at('//svg:rect[@id="rect12147"]')['style']
+		style.gsub(/fill:[^;]*;/, 'fill:#DEFACE;')
