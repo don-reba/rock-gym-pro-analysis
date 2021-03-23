@@ -52,6 +52,10 @@ questions
 			draw a density plot
 				need R for this
 					table with columns for slot and time
+				could also compute it in Nemerle
+					density plots are not terribly difficult
+					this would make it pixel-perfect
+					can reuse the Snaphappi code
 		TODO
 need to account for summer time
 	available from: same day, same time, previous week
@@ -70,3 +74,26 @@ slot timeline
 		slots start at a predefined time on Thursday
 			when the first observed slot opened
 			2021-03-11 19:00
+how about polling BC backcountry reservations?
+	https://discovercamping.ca/BCCWeb/Facilities/TrailRiverCampingSearchView.aspx
+	TODO
+sample < 1min
+	pay an extra visit at random times within the minute
+		maybe only during slot openings
+			I don't know when the slot opens, exactly
+	could be a whole separate script
+		no need to interrupt the current one
+	where to get the schedule
+		from 'combined.json'
+		schedule for each day of the week
+		iterate for each slot in current day
+	scheme
+		loop
+			sleep until several seconds before slot begins
+			generate several random visits
+			get data for those visits
+				data only for the day a week from now
+					only look at the correct slot
+				record data reception time
+			sleep until the next day
+	TODO
