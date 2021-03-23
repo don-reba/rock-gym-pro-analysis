@@ -18,7 +18,7 @@ enum Status
 | Open
 }
 
-def CollectTimelines(scale, path)
+def CollectTimelines(minutesPerSlot, path)
 {
 	def timePattern = Text.LocalDateTimePattern.CreateWithCurrentCulture("yyyy-MM-dd HH:mm");
 	def ParseJsonTime(str)
@@ -31,17 +31,20 @@ def CollectTimelines(scale, path)
 		from - Period.FromDays(7) - Period.FromMinutes(1);
 	}
 
-	def begin = ParseJsonTime("2021-03-11 19:00");
-	def end   = ParseJsonTime("2021-03-18 19:00");
+	def beginSample = ParseJsonTime("2021-03-11 19:00");
+	def endSample   = ParseJsonTime("2021-03-18 19:00");
+
+	def beginSlot = ParseJsonTime("2021-03-18 19:00");
+	def endSlot   = ParseJsonTime("2021-03-25 19:00");
 
 	def SlotIndex(from, to)
 	{
 		def tz = DateTimeZoneProviders.Bcl["Pacific Standard Time"];
 		def from = from.InZoneStrictly(tz);
 		def to   = to.InZoneStrictly(tz);
-		((to - from).TotalMinutes :> int) / scale;
+		((to - from).TotalMinutes :> int) / minutesPerSlot;
 	}
-	def n = SlotIndex(begin, end);
+	def n = SlotIndex(beginSample, endSample);
 
 	WriteLine("Reading data...");
 
@@ -54,7 +57,7 @@ def CollectTimelines(scale, path)
 	foreach ((Key = slot, Value = samples) in data)
 	{
 		def from = ParseJsonTime(slot);
-		when (from >= ParseJsonTime("2021-03-18 19:00"))
+		when (from >= beginSlot && from < endSlot)
 		{
 			def timeline = array(n);
 			foreach (sample in samples)
@@ -83,22 +86,25 @@ def PlotTimelines(timelines, rowHeight, path)
 
 	def StatusColor(_ : Status)
 	{
-	| NA   => Color.White
-	| Open => Color.Green
-	| Full => Color.Gray
+	| NA   => Color.Silver
+	| Open => Color.Black
+	| Full => Color.White
 	}
 
-	mutable y = 0;
 	using (bmp = Bitmap(timelines[0][1].Length, timelines.Count * rowHeight))
 	{
-		foreach ((_, timeline) in timelines)
+		foreach ((_, timeline) in timelines with n)
 		{
-			repeat (rowHeight)
-			{
-				for (mutable x = 0; x != timeline.Length; ++x)
-					bmp.SetPixel(x, y, StatusColor(timeline[x]));
-				++y;
-			}
+      for (mutable x = 0; x != timeline.Length; ++x)
+      {
+        // vertical bars
+        def color = StatusColor(timeline[x]);
+        for (mutable dy = 0; dy != rowHeight; ++dy)
+          bmp.SetPixel(x, n * rowHeight + dy, color);
+        // horizontal lines
+        when (timeline[x] == Status.Full)
+          bmp.SetPixel(x, n * rowHeight + rowHeight / 2, Color.WhiteSmoke);
+      }
 		}
 		bmp.Save(path);
 	}
@@ -106,9 +112,9 @@ def PlotTimelines(timelines, rowHeight, path)
 
 PlotTimelines
 	( timelines = CollectTimelines
-		( scale = 5
-		, path  = @"analysis\combined.json"
+		( minutesPerSlot = 5
+		, path           = @"analysis\combined.json"
 		)
-	, rowHeight = 8
+	, rowHeight = 7
 	, path      = @"analysis\timelines.png"
 	);

@@ -70,6 +70,11 @@ slot timeline
 		for each "open" sample
 			calculate which slot it's in
 			mark it
+		marking time
+			there is no exact time
+				the timelines are all shifted
+			but dividing into 7 days would be informative
+				can do it in Inkscape
 	how to calculate slot
 		slots start at a predefined time on Thursday
 			when the first observed slot opened
