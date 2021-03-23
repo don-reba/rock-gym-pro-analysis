@@ -83,10 +83,15 @@ doc.xpath("//svg:g[@inkscape:label='table']/svg:g/svg:g").each do |cell|
   cell.at('./svg:text').content = ''
 end
 
+begin_slot = Time.parse("2021-03-25 19:00")
+end_slot   = Time.parse("2021-04-01 19:00")
+
 time_to_fill.each do |slot, secs|
   mins = (secs / 60).round
 
   from = Time.parse(slot)
+  next unless begin_slot <= from && from < end_slot
+
   d = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'][from.strftime('%w').to_i]
   t = from.strftime('%H%M')
 
