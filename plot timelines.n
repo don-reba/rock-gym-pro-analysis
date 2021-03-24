@@ -80,12 +80,41 @@ def LoadTimelines(path)
 	timelines;
 }
 
-def SaveTsv(timelines, path)
+def SaveCancelDurations(timelines, path)
 {
-	WriteLine("Writing TSV...");
+	WriteLine("Writing cancel durations...");
 	using (w = File.CreateText(path))
 	{
-		w.WriteLine("slot\ttime");
+		w.WriteLine("time");
+		foreach (timeline in timelines)
+		{
+			mutable full = false;
+			mutable duration = 0;
+			foreach (status in timeline)
+			{
+				full = full || status == Status.Full;
+				when (full) match (status)
+				{
+				| Open => ++duration;
+				| Full =>
+					when (duration > 0)
+						w.WriteLine(duration);
+					duration = 0;
+				| NA => ()
+				}
+			}
+			when (duration > 0)
+				w.WriteLine(duration);
+		}
+	}
+}
+
+def SaveCancels(timelines, path)
+{
+	WriteLine("Writing cancels...");
+	using (w = File.CreateText(path))
+	{
+		w.WriteLine("slot,time");
 		foreach (timeline in timelines with slot)
 		{
 			mutable full = false;
@@ -93,7 +122,7 @@ def SaveTsv(timelines, path)
 			{
 				full = full || status == Status.Full;
 				when (full && status == Status.Open)
-					w.WriteLine("{0}\t{1}", slot, time);
+					w.WriteLine("{0},{1}", slot, time);
 			}
 		}
 	}
@@ -147,7 +176,8 @@ def PlotTimelines(timelines, rowHeight, path)
 
 def timelines = LoadTimelines(@"analysis\combined.json");
 
-SaveTsv(timelines, $@"analysis\cancels 0-$(timelines[0].Length).tsv");
+SaveCancels(timelines, $@"analysis\cancels 0-$(timelines[0].Length).csv");
+SaveCancelDurations(timelines, @"analysis\cancel durations.csv");
 
 PlotTimelines
 	( timelines = Compress

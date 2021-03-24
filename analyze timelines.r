@@ -6,13 +6,11 @@ suppressPackageStartupMessages({
 	
 dpi <- 72
 	
-cancels <- read_delim(
-	"analysis/cancels 0-10020.tsv",
-	delim = "\t",
+cancels <- read_csv(
+	"analysis/cancels 0-10020.csv",
 	col_types = cols(
 		slot = col_integer(),
-		time = col_integer()),
-	trim_ws = TRUE)
+		time = col_integer()))
 
 cancels %>%
 	ggplot() +
