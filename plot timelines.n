@@ -1,0 +1,159 @@
+// REFERENCE: Newtonsoft.Json.dll
+// REFERENCE: NodaTime.dll
+
+using Nemerle.Collections;
+using Nemerle.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using NodaTime;
+using System;
+using System.Collections.Generic;
+using System.Console;
+using System.Drawing;
+using System.IO;
+
+enum Status
+{
+| NA
+| Full
+| Open
+}
+
+def ToStatus(_)
+{
+| "open" => Status.Open
+| "full" => Status.Full
+| "na"   => Status.NA
+| _      => throw ArgumentException()
+}
+
+def LoadTimelines(path)
+{
+	def timePattern = Text.LocalDateTimePattern.CreateWithCurrentCulture("yyyy-MM-dd HH:mm");
+	def ParseJsonTime(str)
+	{
+		timePattern.Parse(str).Value
+	}
+
+	def beginSample = ParseJsonTime("2021-03-11 19:00");
+	def endSample   = ParseJsonTime("2021-03-18 19:00");
+
+	def beginSlot = ParseJsonTime("2021-03-18 19:00");
+	def endSlot   = ParseJsonTime("2021-03-25 19:00");
+
+	def MinuteIndex(from, to)
+	{
+		def tz = DateTimeZoneProviders.Bcl["Pacific Standard Time"];
+		def from = from.InZoneStrictly(tz);
+		def to   = to.InZoneStrictly(tz);
+		(to - from).TotalMinutes :> int;
+	}
+	def n = MinuteIndex(beginSample, endSample);
+
+	WriteLine("Reading data...");
+
+	def data = path |> File.ReadAllText |> JObject.Parse;
+
+	WriteLine("Assembling timelines...");
+
+	def timelines = List();
+
+	foreach ((Key = slot, Value = samples) in data)
+	{
+		def from = ParseJsonTime(slot);
+		when (from >= beginSlot && from < endSlot)
+		{
+			def available = from - Period.FromDays(7) - Period.FromMinutes(1);
+
+			def timeline = array(n);
+			foreach (sample in samples)
+			{
+				def t = ParseJsonTime(sample[0] :> string);
+				def i = MinuteIndex(available, t);
+				when (0 <= i && i < n)
+					timeline[i] = ToStatus(sample[1] :> string);
+			}
+			timelines.Add(timeline);
+		}
+	}
+
+	timelines;
+}
+
+def SaveTsv(timelines, path)
+{
+	WriteLine("Writing TSV...");
+	using (w = File.CreateText(path))
+	{
+		w.WriteLine("slot\ttime");
+		foreach (timeline in timelines with slot)
+		{
+			mutable full = false;
+			foreach (status in timeline with time)
+			{
+				full = full || status == Status.Full;
+				when (full && status == Status.Open)
+					w.WriteLine("{0}\t{1}", slot, time);
+			}
+		}
+	}
+}
+
+def Compress(timelines, minutesPerSlot)
+{
+	def n = timelines[0].Length / minutesPerSlot;
+	timelines.MapToArray(timeline =>
+	{
+		def compressed = array(n);
+		foreach (status in timeline with i)
+		{
+			def j = i / minutesPerSlot;
+			when (status == Status.Open || status == Status.Full && compressed[j] == Status.NA)
+				compressed[j] = status;
+		}
+		compressed;
+	});
+}
+
+def PlotTimelines(timelines, rowHeight, path)
+{
+	WriteLine("Plotting timelines...");
+
+	def StatusColor(_ : Status)
+	{
+	| NA   => Color.Silver
+	| Open => Color.Black
+	| Full => Color.White
+	}
+
+	using (bmp = Bitmap(timelines[0].Length, timelines.Length * rowHeight))
+	{
+		foreach (timeline in timelines with n)
+		{
+			for (mutable x = 0; x != timeline.Length; ++x)
+			{
+				// vertical bars
+				def color = StatusColor(timeline[x]);
+				for (mutable dy = 0; dy != rowHeight; ++dy)
+					bmp.SetPixel(x, n * rowHeight + dy, color);
+				// horizontal lines
+				when (timeline[x] == Status.Full)
+					bmp.SetPixel(x, n * rowHeight + rowHeight / 2, Color.WhiteSmoke);
+			}
+		}
+		bmp.Save(path);
+	}
+}
+
+def timelines = LoadTimelines(@"analysis\combined.json");
+
+SaveTsv(timelines, $@"analysis\cancels 0-$(timelines[0].Length).tsv");
+
+PlotTimelines
+	( timelines = Compress
+		( timelines      = timelines
+		, minutesPerSlot = 6
+		)
+	, rowHeight = 7
+	, path      = @"analysis\timelines.png"
+	);
