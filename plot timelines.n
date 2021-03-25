@@ -151,7 +151,7 @@ def PlotTimelines(timelines, rowHeight, path)
 	def StatusColor(_ : Status)
 	{
 	| NA   => Color.Silver
-	| Open => Color.Black
+	| Open => Color.FromArgb(red = 38, green = 115, blue = 134)
 	| Full => Color.White
 	}
 
