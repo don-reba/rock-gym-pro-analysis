@@ -59,7 +59,9 @@ def sleep_untill_next_day(t)
 end
 
 def random_visits(n, range)
-  n.times.map { rand(range) } .sort
+  visits = Array.new
+  range.each {|t| n.times { visits << t + rand }}
+  visits.sort
 end
 
 offering_guid = '484c1a7ca09145419ef258eeb894c38f'
@@ -85,8 +87,8 @@ loop do
     visits = {}
 
     begin
-      random_visits(10, (-3.0 .. 3.0)).each do |offset|
-        do_at(available + offset) do |now|
+      random_visits(10, (-3 ... 3)).each do |offset|
+        do_at(available + 60 * offset) do |now|
           state = get_slot_state(slot, query_uri, params)
           visits[Time.now.strftime('%F %H:%M:%S.%L')] = state
         end
