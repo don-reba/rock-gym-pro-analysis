@@ -14,7 +14,7 @@ cancels <- read_csv(
 
 cancels %>%
 	ggplot() +
-		geom_density(aes(x=time, y=..scaled..), n=1670, bw=60, fill='black', linetype='blank') +
+		geom_density(aes(x=time, y=..count..*30), n=1670, bw=60, fill='black', linetype='blank') +
 		scale_x_continuous(limits=c(0, 10020), expand=c(0,0)) +
 		theme_void()
 
