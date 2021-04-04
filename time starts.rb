@@ -93,7 +93,7 @@ loop do
           visits[Time.now.strftime('%F %H:%M:%S.%L')] = state
         end
       end
-    rescue SocketError
+    rescue SocketError, OpenURI::HTTPError
       print 'x'
     else
       print '.'

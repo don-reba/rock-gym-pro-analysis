@@ -16,7 +16,7 @@ slots = Dir['data/starts/????-??-??.json'].
 # get the interesting slots
 fast = slots.filter {|_, v| v.values & [:na, :full] == [:na, :full]}
 
-puts "#{fast.count}/#{slots.count} fast-filling slots"
+puts "#{fast.count}/#{slots.count} slots filled up quickly"
 
 # print ranges
 File.open('analysis/starts.csv', 'w') do |f|
