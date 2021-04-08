@@ -12,7 +12,7 @@ starts <- read_csv(
 		begin = col_double(),
 		end   = col_double()))
 
-occ.sd <- 0.75
+occ.sd <- 0.5
 occ <- function(x) {
 	starts %>%
 		rowwise() %>%
@@ -28,10 +28,10 @@ vect <- tibble(x=x, p=Vectorize(occ)(x))
 p <- ggplot(vect) +
 	scale_x_continuous(limits=c(0, max), breaks=seq(0, max, 30), expand=c(0,0)) +
 	scale_y_continuous(limits=c(0, 1), expand=c(0,0)) +
-	geom_ribbon(aes(x=x, min=0, max=p), fill='#AC2A0980') +
+	geom_ribbon(aes(x=x, min=0, max=1-p), fill='#AC2A0980') +
 	theme(axis.text=element_blank(), axis.title=element_blank(), axis.ticks=element_blank())
 
 plot(p)
 
-ggsave('analysis/starts.svg', w=1080/dpi, h=512/dpi, dpi=dpi)
+ggsave('analysis/starts.svg', w=1080/dpi, h=360/dpi, dpi=dpi)
 })

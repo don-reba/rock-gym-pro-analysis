@@ -38,25 +38,24 @@ questions
 			√ divide into classes and colour
 				lightness: 67
 			√ display the exact time, also
-	how likely is it for slots to become available?
+	√ how likely is it for slots to become available?
 		there is a week of availability for each slot
 			when the slot is either open or full
 			graph each and look for patterns
-		visualize
-			draw horizontal bars, one for each slot
+		√ visualize
+			√ draw horizontal bars, one for each slot
 				1080px leaves 9px for each of the 109 slots
 					981px total
 				not enough for 1 min resolution horizontally
 				168px enough for 1 hour resolution
 				1008px for 10 minute resolution
-			draw a density plot
+			√ draw a density plot
 				need R for this
 					table with columns for slot and time
 				could also compute it in Nemerle
 					density plots are not terribly difficult
 					this would make it pixel-perfect
 					can reuse the Snaphappi code
-		TODO
 need to account for summer time
 	available from: same day, same time, previous week
 svg editing
@@ -127,4 +126,30 @@ other info sources
 	BC backcountry reservations
 		https://discovercamping.ca/BCCWeb/Facilities/TrailRiverCampingSearchView.aspx
 	Ground Up in Squamish
+		https://app.rockgympro.com/b/widget/?a=calendar&&widget_guid=e8cacb9641fa4f6ea12a176adc3a3570&random=60692655a0f07&iframeid=&mode=e&lang=english&directurl=https%3A%2F%2Fapp.rockgympro.com%2Fb%2F%3F%26bw%3De8cacb9641fa4f6ea12a176adc3a3570&iframeid=rgpiframe60692655a0fcf
 		TODO
+	multiple info source handling
+		changes
+			different methods of obtaining info
+			different info formats
+				to be made the same on consolidation
+			different storage folders
+				currently writing to data and data/starts
+				change to
+					data/<source>/polls
+					data/<source>/starts
+			different logos and names
+				save the different logos as layers in the template
+			shared analytics
+		implementation
+			a single dl.rb script pulling from multiple sources
+			classes for different types of sources
+				one for Rock Gym Pro
+				one for Cliffhanger
+			multithreaded queries
+Rock Gym Pro
+	calendar view
+		shows all slots
+		does not show "not available" status
+		forwards to the offering view for booking
+	offering view

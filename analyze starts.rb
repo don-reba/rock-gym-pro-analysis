@@ -24,7 +24,7 @@ File.open('analysis/starts.csv', 'w') do |f|
   fast.each do |slot, visits| 
     avail = time_available(slot)
     i = visits.values.index(:full)
-    min = visits.keys[i - 1] - avail
+    min = [0, visits.keys[i - 1] - avail].max
     max = visits.keys[i] - avail
     f.puts '%f,%f' % [min, max]
   end
