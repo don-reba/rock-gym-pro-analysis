@@ -10,6 +10,6 @@ samples = samples.keys.map do |slot|
   schedule[from.wday] << from.strftime('%H:%M')
 end
 
-schedule = schedule.map(&:to_a)
+schedule = schedule.map {|day| day.to_a.sort}
 
 File.write('analysis/schedule.json', JSON.pretty_generate(schedule))
