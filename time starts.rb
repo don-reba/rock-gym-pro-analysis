@@ -32,7 +32,7 @@ def get_slot_state(time, uri, params)
   begin
     offerings = Nokogiri::HTML JSON(result.body)['event_list_html']
   rescue JSON::ParserError
-    File.write('errors/%s.txt' % Time.now.strftime('%F %T'), result.body)
+    File.write('errors/%s.txt' % Time.now.strftime('%F %k %M'), result.body)
     return {}
   end
 
