@@ -4,6 +4,8 @@ This is a collection of scripts and templates I use to collect data from The Hiv
 
 ## Schedule
 
+![Schedule](examples/schedule.png)
+
 Creates an illustration colour-coding The Hive's schedule by the speed with which each slot fills up.
 
 1. Run `dl.rb` for a week to record the status of every slot every minute. The script records data to disk once a day.
@@ -11,6 +13,8 @@ Creates an illustration colour-coding The Hive's schedule by the speed with whic
 3. Run `update schedule.rb` to fill the SVG template `schedule.svg` with the collected data. The result is written to `analysis/schedule.svg`.
 
 ## Fast Bookings
+
+![Fast Bookings](examples/fast-bookings.png)
 
 Creates a diagram  These scripts use the file produced by `consolidate.rb` to get the slot schedule. It is enough to run `dl.rb` only briefly to get enough data for this. However, `time starts.rb` benefits from running for one or more weeks.
 
@@ -20,6 +24,8 @@ Creates a diagram  These scripts use the file produced by `consolidate.rb` to ge
 4. Incorporate the plot into `fast booking.svg`.
 
 ## Timeline
+
+![Timeline](examples/timelines.png)
 
 Creates an illustration showing each slot's status during the whole duration it is available. These scripts use the file produced by `consolidate.rb` to get slot status statistics. Run `dl.rb` for two weeks to gather the data.
 
