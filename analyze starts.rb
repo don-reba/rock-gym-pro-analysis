@@ -1,3 +1,5 @@
+# Create a CSV table listing slot beginnings and endings relative to when they become available.
+
 require 'time'
 require 'json'
 

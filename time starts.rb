@@ -1,3 +1,5 @@
+# Randomly visit each slot several times near its start to determine how quickly it fills up.
+
 require 'date'
 require 'json'
 require 'nokogiri'

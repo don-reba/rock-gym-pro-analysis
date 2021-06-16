@@ -1,3 +1,6 @@
+// Create a diagram of each slot's status throughout the week it is available for signup.
+// Generate a CSV table with cancel statistics.
+
 // REFERENCE: Newtonsoft.Json.dll
 // REFERENCE: NodaTime.dll
 

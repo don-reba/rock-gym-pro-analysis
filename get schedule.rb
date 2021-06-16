@@ -1,3 +1,5 @@
+# Get the slot schedule from the consolidated file produced by `dl.rb` and `consolidate.rb`.
+
 require 'time'
 require 'json'
 require 'set'

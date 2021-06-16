@@ -1,3 +1,5 @@
+# Monitor The Hive's Rock Gym Pro page and record the status of every slot at regular intervals.
+
 require 'json'
 require 'nokogiri'
 require 'open-uri'

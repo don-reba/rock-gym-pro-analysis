@@ -1,3 +1,5 @@
+# Combine an SVG template with slot status data to produce an illustration.
+
 require 'date'
 require 'nokogiri'
 require 'json'
